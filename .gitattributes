@@ -1,0 +1,10 @@
+# Windows / WSL 양쪽에서 같은 작업트리를 쓰므로 줄바꿈을 명시해 둔다.
+* text=auto eol=lf
+
+*.m      text eol=lf
+*.py     text eol=lf
+*.md     text eol=lf
+*.csv    text eol=lf
+*.xml    text eol=lf
+*.rmd    text eol=crlf
+*.rdyn   binary

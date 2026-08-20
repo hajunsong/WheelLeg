@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<SUBENTITIES>
+	<EXPRESSION>
+		<EX NAME="Ex_force">
+			<EDIT_VALUE>IF(time-1:PV_force,0,-PV_force)</EDIT_VALUE>
+		</EX>
+		<EX NAME="cart_px">
+			<EDIT_VALUE>dx(base.Ai, Ground.Cij, Ground.Cij)</EDIT_VALUE>
+		</EX>
+		<EX NAME="cart_py">
+			<EDIT_VALUE>dy(base.Ai, Ground.Cij, Ground.Cij)</EDIT_VALUE>
+		</EX>
+		<EX NAME="cart_pz">
+			<EDIT_VALUE>dz(base.Ai, Ground.Cij, Ground.Cij)</EDIT_VALUE>
+		</EX>
+		<EX NAME="cart_rx">
+			<EDIT_VALUE>roll(base.Ai, Ground.Cij)</EDIT_VALUE>
+		</EX>
+		<EX NAME="cart_ry">
+			<EDIT_VALUE>pitch(base.Ai, Ground.Cij)</EDIT_VALUE>
+		</EX>
+		<EX NAME="cart_rz">
+			<EDIT_VALUE>yaw(base.Ai, Ground.Cij)</EDIT_VALUE>
+		</EX>
+		<EX NAME="cart_vx">
+			<EDIT_VALUE>vx(base.Ai, Ground.Cij, Ground.Cij, Ground.Cij)</EDIT_VALUE>
+		</EX>
+		<EX NAME="cart_vy">
+			<EDIT_VALUE>vy(base.Ai, Ground.Cij, Ground.Cij, Ground.Cij)</EDIT_VALUE>
+		</EX>
+		<EX NAME="cart_vz">
+			<EDIT_VALUE>vz(base.Ai, Ground.Cij, Ground.Cij, Ground.Cij)</EDIT_VALUE>
+		</EX>
+		<EX NAME="cart_wx">
+			<EDIT_VALUE>wx(base.Ai, Ground.Cij, Ground.Cij)</EDIT_VALUE>
+		</EX>
+		<EX NAME="cart_wy">
+			<EDIT_VALUE>wy(base.Ai, Ground.Cij, Ground.Cij)</EDIT_VALUE>
+		</EX>
+		<EX NAME="cart_wz">
+			<EDIT_VALUE>wz(base.Ai, Ground.Cij, Ground.Cij)</EDIT_VALUE>
+		</EX>
+		<EX NAME="cart_accx">
+			<EDIT_VALUE>accx(base.Ai, Ground.Cij, Ground.Cij, Ground.Cij)</EDIT_VALUE>
+		</EX>
+		<EX NAME="cart_accy">
+			<EDIT_VALUE>accy(base.Ai, Ground.Cij, Ground.Cij, Ground.Cij)</EDIT_VALUE>
+		</EX>
+		<EX NAME="cart_accz">
+			<EDIT_VALUE>accz(base.Ai, Ground.Cij, Ground.Cij, Ground.Cij)</EDIT_VALUE>
+		</EX>
+		<EX NAME="cart_wdtx">
+			<EDIT_VALUE>wdtx(base.Ai, Ground.Cij, Ground.Cij, Ground.Cij)</EDIT_VALUE>
+		</EX>
+		<EX NAME="cart_wdty">
+			<EDIT_VALUE>wdty(base.Ai, Ground.Cij, Ground.Cij, Ground.Cij)</EDIT_VALUE>
+		</EX>
+		<EX NAME="cart_wdtz">
+			<EDIT_VALUE>wdtz(base.Ai, Ground.Cij, Ground.Cij, Ground.Cij)</EDIT_VALUE>
+		</EX>
+		<EX NAME="pendulum_q">
+			<EDIT_VALUE>az(body.Ai, base.Cij)</EDIT_VALUE>
+		</EX>
+		<EX NAME="pendulum_qd">
+			<EDIT_VALUE>wz(body.Ai, base.Cij, base.Cij)</EDIT_VALUE>
+		</EX>
+		<EX NAME="pendulum_qdd">
+			<EDIT_VALUE>wdtz(body.Ai, base.Cij, base.Cij, base.Cij)</EDIT_VALUE>
+		</EX>
+		<EX NAME="rho1p_x">
+			<EDIT_VALUE>dx(body.CM, body.Ai, body.Ai)</EDIT_VALUE>
+		</EX>
+		<EX NAME="rho1p_y">
+			<EDIT_VALUE>dy(body.CM, body.Ai, body.Ai)</EDIT_VALUE>
+		</EX>
+		<EX NAME="rho1p_z">
+			<EDIT_VALUE>dz(body.CM, body.Ai, body.Ai)</EDIT_VALUE>
+		</EX>
+		<EX NAME="C11_psi">
+			<EDIT_VALUE>psi(body.CM, body.Ai)</EDIT_VALUE>
+		</EX>
+		<EX NAME="C11_theta">
+			<EDIT_VALUE>theta(body.CM, body.Ai)</EDIT_VALUE>
+		</EX>
+		<EX NAME="C11_phi">
+			<EDIT_VALUE>phi(body.CM, body.Ai)</EDIT_VALUE>
+		</EX>
+		<EX NAME="rho0p_x">
+			<EDIT_VALUE>dx(base.CM, base.Ai, base.Ai)</EDIT_VALUE>
+		</EX>
+		<EX NAME="rho0p_y">
+			<EDIT_VALUE>dy(base.CM, base.Ai, base.Ai)</EDIT_VALUE>
+		</EX>
+		<EX NAME="rho0p_z">
+			<EDIT_VALUE>dz(base.CM, base.Ai, base.Ai)</EDIT_VALUE>
+		</EX>
+		<EX NAME="C00_psi">
+			<EDIT_VALUE>psi(base.CM, base.Ai)</EDIT_VALUE>
+		</EX>
+		<EX NAME="C00_theta">
+			<EDIT_VALUE>theta(base.CM, base.Ai)</EDIT_VALUE>
+		</EX>
+		<EX NAME="C00_phi">
+			<EDIT_VALUE>phi(base.CM, base.Ai)</EDIT_VALUE>
+		</EX>
+		<EX NAME="s01p_x">
+			<EDIT_VALUE>dx(base.Cij, base.Ai, base.Ai)</EDIT_VALUE>
+		</EX>
+		<EX NAME="s01p_y">
+			<EDIT_VALUE>dy(base.Cij, base.Ai, base.Ai)</EDIT_VALUE>
+		</EX>
+		<EX NAME="s01p_z">
+			<EDIT_VALUE>dz(base.Cij, base.Ai, base.Ai)</EDIT_VALUE>
+		</EX>
+		<EX NAME="C01_psi">
+			<EDIT_VALUE>psi(base.Cij, base.Ai)</EDIT_VALUE>
+		</EX>
+		<EX NAME="C01_theta">
+			<EDIT_VALUE>theta(base.Cij, base.Ai)</EDIT_VALUE>
+		</EX>
+		<EX NAME="C01_phi">
+			<EDIT_VALUE>phi(base.Cij, base.Ai)</EDIT_VALUE>
+		</EX>
+	</EXPRESSION>
+</SUBENTITIES>

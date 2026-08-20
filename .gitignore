@@ -1,0 +1,36 @@
+# ===== Python =====
+.venv/
+.venv-wsl/
+__pycache__/
+*.py[cod]
+
+# main.py 가 headless 일 때 생성하는 플롯
+python/compare.png
+python/error.png
+
+# ===== MATLAB =====
+*.asv
+*.m~
+
+# ===== RecurDyn =====
+# 추적하는 것 : 모델(.rdyn), 솔버 입력덱(.rmd), 내보낸 비교 데이터(rec_data.csv)
+# 무시하는 것 : 아래의 해석 결과물 — 재실행으로 생성되고 용량이 큼 (약 37 MB)
+*.rplt
+*.rad
+*.ran
+*.req
+*.out
+*.msg
+*.log
+*.rpi
+*.rpv
+*.rpmx
+*.rdp
+*.rbak
+*_REPORTSTEP.icf
+
+# ===== OS / 편집기 =====
+Thumbs.db
+Desktop.ini
+.DS_Store
+.vscode/
