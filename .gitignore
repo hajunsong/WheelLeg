@@ -29,6 +29,9 @@ python/error.png
 *.rbak
 *_REPORTSTEP.icf
 
+# 해석 런 폴더 통째로 (해석할 때마다 새로 생성됨)
+recurdyn/**/cart_pole_*/
+
 # ===== OS / 편집기 =====
 Thumbs.db
 Desktop.ini
