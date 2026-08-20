@@ -13,11 +13,15 @@ VENV=.venv-linux
 command -v "$PY" >/dev/null 2>&1 || {
     echo "오류: '$PY' 를 찾을 수 없습니다." >&2; exit 1; }
 
-"$PY" -c 'import venv' >/dev/null 2>&1 || {
-    echo "오류: venv 모듈이 없습니다." >&2
-    echo "  Debian/Ubuntu : sudo apt install python3-venv" >&2
-    echo "  Fedora/RHEL   : sudo dnf install python3-virtualenv" >&2
-    exit 1; }
+# Debian 계열은 venv 모듈이 있어도 ensurepip 을 따로 떼어놔서
+# python3 -m venv 가 "ensurepip is not available" 로 실패한다. 둘 다 확인한다.
+for mod in venv ensurepip; do
+    "$PY" -c "import $mod" >/dev/null 2>&1 || {
+        echo "오류: '$mod' 모듈이 없습니다." >&2
+        echo "  Debian/Ubuntu : sudo apt install python3-venv" >&2
+        echo "  Fedora/RHEL   : sudo dnf install python3-virtualenv" >&2
+        exit 1; }
+done
 
 echo "[1/2] $VENV 생성 ($("$PY" --version))"
 rm -rf "$VENV"
