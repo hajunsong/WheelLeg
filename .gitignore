@@ -1,5 +1,6 @@
 # ===== Python =====
 .venv/
+.venv-linux/
 .venv-wsl/
 __pycache__/
 *.py[cod]

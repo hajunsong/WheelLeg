@@ -1,11 +1,5 @@
-contourpy==1.3.3
-cycler==0.12.1
-fonttools==4.63.0
-kiwisolver==1.5.0
-matplotlib==3.11.1
-numpy==2.5.2
-packaging==26.3
-pillow==12.3.0
-pyparsing==3.3.2
-python-dateutil==2.9.0.post0
-six==1.17.0
+# 검증 환경 : numpy 2.5.2 / matplotlib 3.11.1
+#   Windows Python 3.14.5 / Linux Python 3.12.3 에서 결과가 유효숫자 17자리까지 일치
+# 오래된 배포판(Python 3.9~3.11)에서도 설치되도록 하한만 지정한다.
+numpy>=1.24
+matplotlib>=3.6

@@ -1,11 +1,36 @@
 # python — matlab/ 의 1:1 이식
 
 MATLAB 코드와 파일명·함수명·변수명을 그대로 유지해 옮긴 것입니다.
+Windows / WSL / 네이티브 리눅스에서 모두 같은 결과가 나옵니다.
 
 ## 실행
 
-Windows 용(`.venv`)과 WSL/리눅스 용(`.venv-wsl`) venv 가 각각 들어 있습니다.
-`.venv` 는 `Scripts/*.exe`, `.venv-wsl` 은 `bin/` 구조라 서로 호환되지 않아 분리했습니다.
+플랫폼별로 venv 를 따로 둡니다 (`Scripts/*.exe` 와 `bin/` 구조가 호환되지 않습니다).
+
+| 플랫폼 | venv | 셋업 |
+|---|---|---|
+| Windows | `.venv` | `python -m venv .venv` + `pip install -r requirements.txt` |
+| Linux / WSL / macOS | `.venv-linux` | `./setup.sh` |
+
+### Linux / WSL / macOS
+
+```bash
+cd python
+./setup.sh                          # venv 생성 + 의존성 설치
+./.venv-linux/bin/python main.py
+```
+
+`PYTHON=python3.12 ./setup.sh` 처럼 인터프리터를 지정할 수도 있습니다.
+
+`venv` 모듈이 없다는 오류가 나면 배포판 패키지를 먼저 설치하세요.
+
+```bash
+sudo apt install python3-venv        # Debian / Ubuntu
+sudo dnf install python3-virtualenv  # Fedora / RHEL
+```
+
+**플롯**: `DISPLAY` 나 `WAYLAND_DISPLAY` 가 있으면 창이 뜹니다 (WSL 은 WSLg 로 자동).
+없으면(SSH, 컨테이너, CI 등) `compare.png` / `error.png` 로 저장합니다.
 
 ### Windows (PowerShell)
 
@@ -14,33 +39,18 @@ cd C:\Users\gkwns\Desktop\WheelLeg\python
 .\.venv\Scripts\python.exe main.py
 ```
 
+처음이라면 venv 부터:
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+```
+
 활성화해서 쓰려면 `.\.venv\Scripts\Activate.ps1` 실행 후 `python main.py`, 나올 때 `deactivate`.
 VSCode 에서는 `Ctrl+Shift+P` → **Python: Select Interpreter** 로
 `.\python\.venv\Scripts\python.exe` 를 지정하면 실행 버튼이 그대로 동작합니다.
 
-### WSL (Ubuntu)
-
-```bash
-cd /mnt/c/Users/gkwns/Desktop/WheelLeg/python
-./.venv-wsl/bin/python main.py
-```
-
-WSLg 가 있으면(`echo $DISPLAY` 가 `:0`) matplotlib 창이 그대로 뜹니다.
-SSH 접속처럼 `DISPLAY` 가 없는 환경이면 자동으로 `compare.png`, `error.png` 로 저장합니다.
-
-### venv 재생성
-
-```powershell
-python -m venv .venv                                          # Windows
-.\.venv\Scripts\python.exe -m pip install -r requirements.txt
-```
-
-```bash
-python3 -m venv .venv-wsl                                     # WSL / Linux
-./.venv-wsl/bin/python -m pip install -r requirements.txt
-```
-
-`.venv` 폴더는 절대경로가 박혀 있어 복사/이동으로는 옮겨지지 않습니다.
+> venv 폴더는 내부에 절대경로가 박혀 있어 복사·이동으로는 옮겨지지 않습니다. 항상 새로 만드세요.
 
 ## 파일 대응
 
@@ -54,6 +64,7 @@ python3 -m venv .venv-wsl                                     # WSL / Linux
 | `dYdt.m` | `dYdt.py` | 상태 Y → 미분 Yp (재귀 정식화) |
 | `main.m` | `main.py` | 파라미터 + RK4 + RecurDyn 비교/플롯 |
 | (MATLAB 내장) | `util.py` | `col()` = `[a;b;c]`, `rms()` |
+| — | `setup.sh` | POSIX 환경 셋업 (Python 전용) |
 
 ## MATLAB 과 달라지는 부분
 
@@ -67,12 +78,20 @@ python3 -m venv .venv-wsl                                     # WSL / Linux
 - **행렬 연산**: `*` → `@`, `'` → `.T`, `M\Q` → `np.linalg.solve(M, Q)`
 - **행렬 조립**: `[A, B; C, D]` → `np.block([[A, B], [C, D]])`
 - **두번째 출력**: MATLAB `[Yp, out] = dYdt(...)` → `dYdt(..., full=True)` 가 `(Yp, out)` 반환
-- **플롯**: `DISPLAY` 가 없으면 PNG 저장으로 자동 전환 (MATLAB 에는 없는 분기)
+- **플롯**: 디스플레이가 없으면 PNG 저장으로 자동 전환 (MATLAB 에는 없는 분기)
 - 열벡터는 shape `(n, 1)` 유지 — `(n,)` 로 두면 브로드캐스팅이 MATLAB 과 달라집니다.
+
+## 이식성
+
+- **경로**: 기준 데이터 `rec_data.csv` 를 `Path(__file__)` 기준으로 찾으므로
+  작업 디렉터리와 무관하게 실행됩니다.
+- **대소문자**: 네이티브 리눅스(ext4)는 대소문자를 구분합니다. `/mnt/c` 나 NTFS 에서는
+  구분하지 않아 파일명 불일치가 드러나지 않으므로, 검증은 ext4 에 clone 해서 수행했습니다.
+- **줄바꿈**: 저장소 루트 `.gitattributes` 로 `.py` 는 LF 고정입니다.
 
 ## 검증
 
-동일 초기조건에서 MATLAB 과 Python 의 전체 궤적(상태 15 + 미분 15, 2001 스텝)을 비교한 결과
-**최대 상대오차 2.05e-14** (dq1(0)=0), **1.54e-14** (dq1(0)=3) 로 기계 정밀도 수준입니다.
-
-Windows(Python 3.14.5) 와 WSL(Python 3.12.3) 실행 결과는 유효숫자 17 자리까지 완전히 동일합니다.
+- MATLAB ↔ Python : 동일 초기조건에서 전체 궤적(상태 15 + 미분 15, 2001 스텝) 비교 결과
+  **최대 상대오차 2.05e-14**
+- Windows (Python 3.14.5) ↔ Linux (Python 3.12.3) : 유효숫자 **17 자리까지 완전 일치**
+- 네이티브 리눅스 검증 : GitHub 에서 ext4 로 clone → `./setup.sh` → 실행까지 확인

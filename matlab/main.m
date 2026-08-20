@@ -46,7 +46,8 @@ p0  = mat2ep(ang2mat(0, -pi/2, 0));     % base.Ai 의 전역 자세
 q1  = 0;
 dr0 = [0;0;0];
 w0  = [0;0;0];
-dq1 = 3;
+dq1 = 3;                                % 주의: RecurDyn cart_pole_16 은 초기속도 0 이라
+                                        %       아래 RecurDyn 비교표는 이 값에서 어긋난다
 
 Y = [r0; p0; q1; dr0; w0; dq1];
 
@@ -62,7 +63,7 @@ for k = 1:n
     t  = T(k);
     k1 = dYdt(t,       Y,          prm);
     k2 = dYdt(t + h/2, Y + h/2*k1, prm);
-    k3 = dYdt(t + h/2, Y + h/2*k2, prm);6
+    k3 = dYdt(t + h/2, Y + h/2*k2, prm);
     k4 = dYdt(t + h,   Y + h*k3,   prm);
 
     AA(:,k) = k1;

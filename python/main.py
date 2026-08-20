@@ -60,7 +60,8 @@ p0 = mat2ep(ang2mat(0, -np.pi/2, 0))            # base.Ai 의 전역 자세
 q1 = 0.0
 dr0 = col(0, 0, 0)
 w0 = col(0, 0, 0)
-dq1 = 3.0                                       # RecurDyn cart_pole_16 에는 초기속도가 없다
+dq1 = 3.0                   # 주의: RecurDyn cart_pole_16 은 초기속도 0 이라
+                            #       아래 RecurDyn 비교표는 이 값에서 어긋난다
 
 Y = np.block([[r0], [p0], [col(q1)], [dr0], [w0], [col(dq1)]])
 
@@ -144,11 +145,15 @@ if __name__ == '__main__':
 
     import matplotlib
 
-    # WSL/리눅스에서 DISPLAY 가 없으면 창을 띄울 수 없으니 PNG 로 떨군다.
-    headless = os.name != 'nt' and not (os.environ.get('DISPLAY') or
-                                        os.environ.get('WAYLAND_DISPLAY'))
-    if headless:
+    # 리눅스에서 디스플레이가 없으면 창을 띄울 수 없으므로 Agg 로 내린다.
+    if os.name != 'nt' and not (os.environ.get('DISPLAY') or
+                                os.environ.get('WAYLAND_DISPLAY')):
         matplotlib.use('Agg')
+
+    # 최종적으로 잡힌 backend 가 비대화형이면 PNG 로 떨군다.
+    # (MPLBACKEND=Agg 로 강제했거나 GUI 툴킷이 없어 Agg 로 떨어진 경우까지 포함)
+    headless = matplotlib.get_backend().lower() in {
+        'agg', 'cairo', 'pdf', 'pgf', 'ps', 'svg', 'template'}
     import matplotlib.pyplot as plt
 
     fig, ax = plt.subplots(3, 2, figsize=(11.5, 7.5), num='MATLAB vs RecurDyn')
