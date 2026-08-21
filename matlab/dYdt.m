@@ -39,7 +39,7 @@ function [Yp, out] = dYdt(t, Y, prm)
 
     Y0h = [dr0 + r0t*w0; w0];
 
-    % 외력 : RecurDyn TRANSLATIONAL_FORCE, FY = step5(time, 0, F, 1, -F), RM = global
+    % 외력 : RecurDyn TRANSLATIONAL_FORCE, FY = step5(time, 0, F, 1, -F) [N], RM = global
     %        작용점 base.Marker4 가 base.CM 과 같은 위치라 순수 CM 힘으로 들어간다
     Fy = step5(t, 0, prm.F_ex, 1, -prm.F_ex);
 

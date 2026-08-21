@@ -7,7 +7,7 @@ from tilde import tilde
 from util import col
 
 
-def dYdt(t, Y, prm, full=False):
+def dYdt(t, Y, prm, full=False, Fy=None):
     """
     상태벡터 Y 를 받아 미분 Yp 를 돌려준다. (RK4 의 각 stage 에서 호출)
 
@@ -15,6 +15,7 @@ def dYdt(t, Y, prm, full=False):
       Yp = [ dr0(3); dp0(4); dq1;  ddr0(3);  dw0(3); ddq1 ]   (15x1)
 
     full=True 이면 (Yp, out) 을 돌려준다.  (MATLAB 의 두번째 출력)
+    Fy가 주어지면 시간 함수 대신 해당 제어력[N]을 사용한다.
     """
     # ---------------- Y2qdq ----------------
     # MATLAB 은 1-base, Python 은 0-base 라 인덱스만 한 칸씩 당겨진다.
@@ -50,9 +51,12 @@ def dYdt(t, Y, prm, full=False):
 
     Y0h = np.block([[dr0 + r0t @ w0], [w0]])
 
-    # 외력 : RecurDyn TRANSLATIONAL_FORCE, FY = step5(time, 0, F, 1, -F), RM = global
+    # 외력 : RecurDyn TRANSLATIONAL_FORCE, FY = step5(time, 0, F, 1, -F) [N], RM = global
     #        작용점 base.Marker4 가 base.CM 과 같은 위치라 순수 CM 힘으로 들어간다
-    Fy = step5(t, 0.0, prm.F_ex, 1.0, -prm.F_ex)
+    if Fy is None:
+        Fy = step5(t, 0.0, prm.F_ex, 1.0, -prm.F_ex)
+    else:
+        Fy = float(Fy)
 
     f0c = col(0.0, Fy, prm.m0*prm.g)
     t0c = col(0.0, 0.0, 0.0)

@@ -18,6 +18,7 @@ Windows / WSL / 네이티브 리눅스에서 모두 같은 결과가 나옵니�
 cd python
 ./setup.sh                          # venv 생성 + 의존성 설치
 ./.venv-linux/bin/python main.py
+./.venv-linux/bin/python lqr_control.py
 ```
 
 `PYTHON=python3.12 ./setup.sh` 처럼 인터프리터를 지정할 수도 있습니다.
@@ -29,14 +30,16 @@ sudo apt install python3-venv        # Debian / Ubuntu
 sudo dnf install python3-virtualenv  # Fedora / RHEL
 ```
 
-**플롯**: `DISPLAY` 나 `WAYLAND_DISPLAY` 가 있으면 창이 뜹니다 (WSL 은 WSLg 로 자동).
-없으면(SSH, 컨테이너, CI 등) `compare.png` / `error.png` 로 저장합니다.
+**시각화**: `DISPLAY` 나 `WAYLAND_DISPLAY` 가 있으면 창이 뜹니다 (WSL 은 WSLg 로 자동).
+없으면(SSH, 컨테이너, CI 등) PNG로 저장합니다. `lqr_control.py`는 실행 환경과
+관계없이 `lqr_animation.gif`도 생성합니다.
 
 ### Windows (PowerShell)
 
 ```powershell
 cd C:\Users\gkwns\Desktop\WheelLeg\python
 .\.venv\Scripts\python.exe main.py
+.\.venv\Scripts\python.exe lqr_control.py
 ```
 
 처음이라면 venv 부터:
@@ -63,6 +66,8 @@ VSCode 에서는 `Ctrl+Shift+P` → **Python: Select Interpreter** 로
 | `step5.m` | `step5.py` | ADAMS/RecurDyn 5차 다항 step |
 | `dYdt.m` | `dYdt.py` | 상태 Y → 미분 Yp (재귀 정식화) |
 | `main.m` | `main.py` | 파라미터 + RK4 + RecurDyn 비교/플롯 |
+| — | `model.py` | SI 모델 파라미터 + 축약/전체 상태 변환 |
+| — | `lqr_control.py` | 수치 선형화 + CARE 기반 LQR + 비선형 폐루프 시뮬레이션 |
 | (MATLAB 내장) | `util.py` | `col()` = `[a;b;c]`, `rms()` |
 | — | `setup.sh` | POSIX 환경 셋업 (Python 전용) |
 
@@ -78,6 +83,7 @@ VSCode 에서는 `Ctrl+Shift+P` → **Python: Select Interpreter** 로
 - **행렬 연산**: `*` → `@`, `'` → `.T`, `M\Q` → `np.linalg.solve(M, Q)`
 - **행렬 조립**: `[A, B; C, D]` → `np.block([[A, B], [C, D]])`
 - **두번째 출력**: MATLAB `[Yp, out] = dYdt(...)` → `dYdt(..., full=True)` 가 `(Yp, out)` 반환
+- **제어 입력**: `dYdt(..., Fy=u)`로 시간 함수 대신 외력 `u`[N]를 직접 입력
 - **플롯**: 디스플레이가 없으면 PNG 저장으로 자동 전환 (MATLAB 에는 없는 분기)
 - 열벡터는 shape `(n, 1)` 유지 — `(n,)` 로 두면 브로드캐스팅이 MATLAB 과 달라집니다.
 

@@ -3,3 +3,5 @@
 # 오래된 배포판(Python 3.9~3.11)에서도 설치되도록 하한만 지정한다.
 numpy>=1.24
 matplotlib>=3.6
+scipy>=1.10
+pillow>=9.0

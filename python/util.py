@@ -4,7 +4,7 @@ import numpy as np
 
 
 def col(*vals):
-    """MATLAB 의 [a; b; c] 열벡터.  col(0, 0, -50) -> shape (3, 1)"""
+    """MATLAB 의 [a; b; c] 열벡터.  col(0, 0, -0.05) -> shape (3, 1)"""
     return np.array(vals, dtype=float).reshape(-1, 1)
 
 

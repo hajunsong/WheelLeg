@@ -8,62 +8,19 @@ from types import SimpleNamespace
 
 import numpy as np
 
-from ang2mat import ang2mat
 from dYdt import dYdt
-from mat2ep import mat2ep
-from util import col, rms
+from model import create_parameters, full_state
+from util import rms
 
 # ======================= parameter =======================
-# 단위계 : MMKS (mm, kg, s).  힘의 내부 단위는 kg*mm/s^2 (= mN) 이므로
-#          N 로 주어진 값은 1000 을 곱해서 넣는다.
-prm = SimpleNamespace()
-
-# ---- base body (기준계 = base.Ai) ----
-prm.rho0p = col(0, 0, 0)
-prm.C00 = ang2mat(0, np.pi/2, 0)
-
-prm.m0 = 111.015764646288
-Ixx = 9343826.85772924;  Ixy = 0.0
-Iyy = 277539.41161572;   Iyz = 0.0
-Izz = 9436339.99493448;  Izx = 0.0
-prm.J0p = np.array([[Ixx, Ixy, Izx],
-                    [Ixy, Iyy, Iyz],
-                    [Izx, Iyz, Izz]])
-
-# ---- link body (기준계 = body.Ai) ----
-prm.s01p = col(0, 0, 0)
-prm.C01 = ang2mat(np.pi/2, np.pi/2, np.pi/2)
-
-prm.rho1p = col(0.00622253616772498, 359.132273856264, 0)   # body.CM QP - body.Ai QP (Ai 프레임)
-prm.C11 = ang2mat(np.pi, np.pi/2, np.pi/2)
-
-prm.m1 = 18.6342592049469
-Ixx = 604104.103452763;   Ixy = 0.126126031622254
-Iyy = 565728.29220829;    Iyz = -35.7293476271758
-Izz = 40317.2972174389;   Izx = -3.51625272013543e-13
-prm.J1p = np.array([[Ixx, Ixy, Izx],
-                    [Ixy, Iyy, Iyz],
-                    [Izx, Iyz, Izz]])
-
-# ---- system ----
-prm.g = -9806.65            # mm/s^2  (RecurDyn KGRAV 와 동일)
-prm.F_ex = 10*1000          # cart_pole_16 : FY = step5(time, 0, 10, 1, -10) [N]
-                            #   길이가 mm 라 내부 힘 단위는 kg*mm/s^2 -> N 값에 1000 을 곱한다
-prm.free = [2, 7]           # 살릴 자유도 : base 전역 Y 병진 + 회전 조인트 (MATLAB 과 같은 1-base)
+# 단위계 : SI (m, kg, s, N). 관성모멘트 단위는 kg*m^2 이다.
+prm = create_parameters()
 
 h = 0.001
 t_e = 2
 
 # ======================= initial condition =======================
-r0 = col(0, 0, -50)                             # base.Ai 의 전역 위치
-p0 = mat2ep(ang2mat(0, -np.pi/2, 0))            # base.Ai 의 전역 자세
-q1 = 0.0
-dr0 = col(0, 0, 0)
-w0 = col(0, 0, 0)
-dq1 = 3.0                   # 주의: RecurDyn cart_pole_16 은 초기속도 0 이라
-                            #       아래 RecurDyn 비교표는 이 값에서 어긋난다
-
-Y = np.block([[r0], [p0], [col(q1)], [dr0], [w0], [col(dq1)]])
+Y = full_state([0.0, 0.0, 0.0, 3.0])  # dq1=3은 RecurDyn의 초기속도 0과 다르다.
 
 # ======================= RK4 =======================
 n = round(t_e/h)
@@ -92,9 +49,9 @@ AA[:, -1:] = dYdt(T[-1], YY[:, -1:], prm)
 # ======================= post processing =======================
 # cart_pole_16 의 cart_px/py/pz = dx/dy/dz(base.Ai, Ground.origin, Ground.origin)
 # Ground.origin 은 QP=(0,0,0), REULER=(0,0,0) 즉 전역계라 변환이 필요없다.
-cart_p = YY[0:3, :]         # [cart_px; cart_py; cart_pz]  [mm]
-cart_v = YY[8:11, :]        # [cart_vx; cart_vy; cart_vz]  [mm/s]
-cart_a = AA[8:11, :]        # [cart_accx; ...]             [mm/s^2]
+cart_p = YY[0:3, :]         # [cart_px; cart_py; cart_pz]  [m]
+cart_v = YY[8:11, :]        # [cart_vx; cart_vy; cart_vz]  [m/s]
+cart_a = AA[8:11, :]        # [cart_accx; ...]             [m/s^2]
 
 pend_q = YY[7, :]           # pendulum_q   = az(body.Ai, base.Cij)   [rad]
 pend_qd = YY[14, :]         # pendulum_qd                            [rad/s]
@@ -104,11 +61,11 @@ print(f't = {T[0]:.3f} ~ {T[-1]:.3f} s, {n} steps (h = {h:g})')
 print(f'quaternion norm drift : {np.abs(np.linalg.norm(YY[3:7, :], axis=0) - 1).max():.3e}')
 
 # ======================= RecurDyn 비교 =======================
-# rec_data.csv : 헤더 없음, 8 열
+# rec_data.csv : 헤더 없음, 8 열 (RecurDyn 원본 병진 채널은 mm 단위)
 #   [ index, time, cart_py, cart_vy, cart_accy, pendulum_q, pendulum_qd, pendulum_qdd ]
 csv = Path(__file__).resolve().parent / '..' / 'recurdyn' / '01_cart_pole' / 'rec_data.csv'
 
-lab = ['cart_py [mm]',     'cart_vy [mm/s]',      'cart_accy [mm/s^2]',
+lab = ['cart_py [m]',      'cart_vy [m/s]',       'cart_accy [m/s^2]',
        'pendulum_q [rad]', 'pendulum_qd [rad/s]', 'pendulum_qdd [rad/s^2]']
 mine = np.vstack([cart_p[1, :], cart_v[1, :], cart_a[1, :], pend_q, pend_qd, pend_qdd])
 
@@ -116,6 +73,7 @@ ref = None
 if csv.is_file():
     R = np.loadtxt(csv, delimiter=',')
     ref = SimpleNamespace(t=R[:, 1], y=R[:, 2:8].T)
+    ref.y[0:3, :] *= 1e-3                       # mm 계열 -> SI(m 계열)
     print(f'\nRecurDyn : rec_data.csv ({ref.t.size} points, t = {ref.t[0]:.3f} ~ {ref.t[-1]:.3f})')
     print(f'{"channel":<24} {"max|err|":>12} {"RMS":>12} {"rel.RMS":>10}')
     err = np.zeros((6, ref.t.size))

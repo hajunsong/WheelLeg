@@ -1,17 +1,16 @@
 clc; clear; close all;
 
 %% ======================= parameter =======================
-% 단위계 : MMKS (mm, kg, s).  힘의 내부 단위는 kg*mm/s^2 (= mN) 이므로
-%          N 로 주어진 값은 1000 을 곱해서 넣는다.
+% 단위계 : SI (m, kg, s, N). 관성모멘트 단위는 kg*m^2 이다.
 
 % ---- base body (기준계 = base.Ai) ----
 prm.rho0p = [0;0;0];
 prm.C00   = ang2mat(0, pi/2, 0);
 
 prm.m0 = 111.015764646288;
-Ixx = 9343826.85772924;  Ixy = 0;
-Iyy = 277539.41161572;   Iyz = 0;
-Izz = 9436339.99493448;  Izx = 0;
+Ixx = 9.34382685772924;  Ixy = 0;
+Iyy = 0.27753941161572;  Iyz = 0;
+Izz = 9.43633999493448;  Izx = 0;
 prm.J0p = [Ixx, Ixy, Izx;
            Ixy, Iyy, Iyz;
            Izx, Iyz, Izz];
@@ -20,28 +19,27 @@ prm.J0p = [Ixx, Ixy, Izx;
 prm.s01p  = [0;0;0];
 prm.C01   = ang2mat(pi/2, pi/2, pi/2);
 
-prm.rho1p = [0.00622253616772498; 359.132273856264; 0];   % body.CM QP - body.Ai QP (Ai 프레임)
+prm.rho1p = [6.22253616772498e-6; 0.359132273856264; 0];  % body.CM QP - body.Ai QP [m] (Ai 프레임)
 prm.C11   = ang2mat(pi, pi/2, pi/2);
 
 prm.m1 = 18.6342592049469;
-Ixx = 604104.103452763;   Ixy =  0.126126031622254;
-Iyy = 565728.29220829;    Iyz = -35.7293476271758;
-Izz = 40317.2972174389;   Izx = -3.51625272013543e-13;
+Ixx = 0.604104103452763;  Ixy =  1.26126031622254e-7;
+Iyy = 0.56572829220829;   Iyz = -3.57293476271758e-5;
+Izz = 0.0403172972174389; Izx = -3.51625272013543e-19;
 prm.J1p = [Ixx, Ixy, Izx;
            Ixy, Iyy, Iyz;
            Izx, Iyz, Izz];
 
 % ---- system ----
-prm.g    = -9806.65;        % mm/s^2  (RecurDyn KGRAV 와 동일)
-prm.F_ex = 10*1000;         % cart_pole_16 : FY = step5(time, 0, 10, 1, -10) [N]
-                            %   길이가 mm 라 내부 힘 단위는 kg*mm/s^2 -> N 값에 1000 을 곱한다
+prm.g    = -9.80665;        % m/s^2
+prm.F_ex = 10;              % cart_pole_16 : FY = step5(time, 0, 10, 1, -10) [N]
 prm.free = [2, 7];          % 살릴 자유도 : base 전역 Y 병진 + 회전 조인트
 
 h   = 0.001;
 t_e = 2;
 
 %% ======================= initial condition =======================
-r0  = [0;0;-50];                        % base.Ai 의 전역 위치
+r0  = [0;0;-0.05];                      % base.Ai 의 전역 위치 [m]
 p0  = mat2ep(ang2mat(0, -pi/2, 0));     % base.Ai 의 전역 자세
 q1  = 0;
 dr0 = [0;0;0];
@@ -78,9 +76,9 @@ AA(:,end) = dYdt(T(end), YY(:,end), prm);
 %% ======================= post processing =======================
 % cart_pole_13 의 cart_px/py/pz = dx/dy/dz(base.Ai, Ground.origin, Ground.origin)
 % Ground.origin 은 QP=(0,0,0), REULER=(0,0,0) 즉 전역계라 변환이 필요없다.
-cart_p = YY(1:3,  :);       % [cart_px; cart_py; cart_pz]  [mm]
-cart_v = YY(9:11, :);       % [cart_vx; cart_vy; cart_vz]  [mm/s]
-cart_a = AA(9:11, :);       % [cart_accx; ...]             [mm/s^2]
+cart_p = YY(1:3,  :);       % [cart_px; cart_py; cart_pz]  [m]
+cart_v = YY(9:11, :);       % [cart_vx; cart_vy; cart_vz]  [m/s]
+cart_a = AA(9:11, :);       % [cart_accx; ...]             [m/s^2]
 
 pend_q   = YY(8,  :);       % pendulum_q   = az(body.Ai, base.Cij)   [rad]
 pend_qd  = YY(15, :);       % pendulum_qd                            [rad/s]
@@ -90,11 +88,11 @@ fprintf('t = %.3f ~ %.3f s, %d steps (h = %g)\n', T(1), T(end), n, h);
 fprintf('quaternion norm drift : %.3e\n', max(abs(vecnorm(YY(4:7,:)) - 1)));
 
 %% ======================= RecurDyn 비교 =======================
-% rec_data.csv : 헤더 없음, 8 열
+% rec_data.csv : 헤더 없음, 8 열 (RecurDyn 원본 병진 채널은 mm 단위)
 %   [ index, time, cart_py, cart_vy, cart_accy, pendulum_q, pendulum_qd, pendulum_qdd ]
 csv = fullfile(fileparts(mfilename('fullpath')), '..', 'recurdyn', '01_cart_pole', 'rec_data.csv');
 
-lab  = {'cart\_py [mm]',    'cart\_vy [mm/s]',     'cart\_accy [mm/s^2]', ...
+lab  = {'cart\_py [m]',     'cart\_vy [m/s]',      'cart\_accy [m/s^2]', ...
         'pendulum\_q [rad]','pendulum\_qd [rad/s]','pendulum\_qdd [rad/s^2]'};
 mine = [cart_p(2,:); cart_v(2,:); cart_a(2,:); pend_q; pend_qd; pend_qdd];
 
@@ -103,6 +101,7 @@ if isfile(csv)
     R     = readmatrix(csv);
     ref.t = R(:,2).';
     ref.y = R(:,3:8).';
+    ref.y(1:3,:) = 1e-3*ref.y(1:3,:);              % mm 계열 -> SI(m 계열)
     fprintf('\nRecurDyn : rec_data.csv (%d points, t = %.3f ~ %.3f)\n', ...
             numel(ref.t), ref.t(1), ref.t(end));
     fprintf('%-24s %12s %12s %10s\n', 'channel', 'max|err|', 'RMS', 'rel.RMS');

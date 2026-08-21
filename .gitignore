@@ -8,6 +8,14 @@ __pycache__/
 # main.py 가 headless 일 때 생성하는 플롯
 python/compare.png
 python/error.png
+python/lqr_response.png
+python/lqr_animation.gif
+
+# ===== C++ =====
+cpp/build/
+cpp/*.csv
+cpp/*.png
+cpp/*.gif
 
 # ===== MATLAB =====
 *.asv
