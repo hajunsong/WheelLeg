@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mujoco model="balancing_robot">
+  <compiler angle="radian" meshdir="../meshes" autolimits="true"/>
+  <option timestep="0.002" integrator="RK4" gravity="0 0 -9.81">
+    <flag contact="enable"/>
+  </option>
+
+  <visual>
+    <headlight ambient="0.35 0.35 0.35" diffuse="0.65 0.65 0.65" specular="0.2 0.2 0.2"/>
+    <rgba haze="0.15 0.25 0.35 1"/>
+    <global azimuth="135" elevation="-18"/>
+  </visual>
+
+  <default>
+    <joint damping="0.001" armature="1e-5"/>
+    <geom condim="3" friction="1.0 0.005 0.0001" solref="0.004 1"/>
+    <motor ctrllimited="true" ctrlrange="-1 1"/>
+  </default>
+
+  <asset>
+    <mesh name="base_mesh" file="base_link.STL"/>
+    <mesh name="wheel_right_mesh" file="wheel_R.STL"/>
+    <mesh name="wheel_left_mesh" file="wheel_L.STL"/>
+    <texture name="ground_texture" type="2d" builtin="checker"
+             rgb1="0.18 0.18 0.18" rgb2="0.28 0.28 0.28"
+             width="512" height="512"/>
+    <material name="ground_material" texture="ground_texture"
+              texrepeat="2 2" texuniform="true" reflectance="0.08"/>
+  </asset>
+
+  <worldbody>
+    <light pos="0 -1 2" dir="0 0 -1" directional="true"/>
+    <geom name="floor" type="plane" size="0 0 0.05" material="ground_material"/>
+    <camera name="side" pos="0 -0.6 0.10" xyaxes="1 0 0 0 0 1"/>
+
+    <!--
+      원본 CAD 좌표계: X=전진, Y=차체 높이, Z=바퀴 축.
+      -90 deg X 회전으로 MuJoCo의 X=전진, Y=좌우, Z=높이에 맞춘다.
+    -->
+    <body name="base_link" pos="0 0 0.02" quat="0.70710678 -0.70710678 0 0">
+      <freejoint name="base_free_joint"/>
+      <!--
+        제어 연습용으로 전후 무게중심 X와 교차 관성을 0으로 대칭화했다.
+        CAD 측정값 X=0.002528 m를 쓰면 정지 평형 자세가 약 2.7 deg 기울어진다.
+      -->
+      <inertial pos="0 -0.053438 0" mass="0.39313"
+                diaginertia="0.00061679 0.00034177 0.00042783"/>
+      <geom name="base_visual" type="mesh" mesh="base_mesh"
+            contype="0" conaffinity="0" group="1"
+            rgba="0.36 0.48 0.80 1"/>
+      <!-- 단순 충돌 형상은 삼각 메시보다 접촉이 안정적이고 계산량이 적다. -->
+      <geom name="base_collision" type="box" pos="0.01 -0.05 0"
+            size="0.03 0.05 0.045" rgba="0.36 0.48 0.80 0"/>
+      <site name="imu_site" pos="0 -0.05 0" size="0.003" rgba="1 0 0 1"/>
+
+      <body name="wheel_R" pos="0 -0.005 -0.045" quat="0 0 0 1">
+        <joint name="right_wheel_joint" type="hinge" axis="0 0 1"/>
+        <inertial pos="0 0 -0.01" mass="0.03927"
+                  diaginertia="0.0000074449 0.0000074449 0.000012272"/>
+        <geom name="right_wheel_visual" type="mesh" mesh="wheel_right_mesh"
+              contype="0" conaffinity="0" group="1" rgba="0.12 0.12 0.14 1"/>
+        <geom name="right_wheel_collision" type="cylinder" pos="0 0 -0.01"
+              size="0.025 0.01" rgba="0.12 0.12 0.14 0"/>
+      </body>
+
+      <body name="wheel_L" pos="0 -0.005 0.045" quat="0 0 0 1">
+        <joint name="left_wheel_joint" type="hinge" axis="0 0 1"/>
+        <inertial pos="0 0 0.01" mass="0.03927"
+                  diaginertia="0.0000074449 0.0000074449 0.000012272"/>
+        <geom name="left_wheel_visual" type="mesh" mesh="wheel_left_mesh"
+              contype="0" conaffinity="0" group="1" rgba="0.12 0.12 0.14 1"/>
+        <geom name="left_wheel_collision" type="cylinder" pos="0 0 0.01"
+              size="0.025 0.01" rgba="0.12 0.12 0.14 0"/>
+      </body>
+    </body>
+  </worldbody>
+
+  <!-- data.ctrl 값이 gear=1을 거쳐 각 관절 토크[N·m]로 직접 적용된다. -->
+  <actuator>
+    <motor name="right_wheel_torque" joint="right_wheel_joint" gear="1"/>
+    <motor name="left_wheel_torque" joint="left_wheel_joint" gear="1"/>
+  </actuator>
+
+  <sensor>
+    <jointpos name="right_wheel_position" joint="right_wheel_joint"/>
+    <jointpos name="left_wheel_position" joint="left_wheel_joint"/>
+    <jointvel name="right_wheel_velocity" joint="right_wheel_joint"/>
+    <jointvel name="left_wheel_velocity" joint="left_wheel_joint"/>
+    <actuatorfrc name="right_wheel_applied_torque" actuator="right_wheel_torque"/>
+    <actuatorfrc name="left_wheel_applied_torque" actuator="left_wheel_torque"/>
+    <framequat name="base_orientation" objtype="body" objname="base_link"/>
+    <gyro name="base_angular_velocity" site="imu_site"/>
+    <accelerometer name="base_acceleration" site="imu_site"/>
+  </sensor>
+</mujoco>
